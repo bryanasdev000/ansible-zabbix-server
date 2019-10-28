@@ -27,7 +27,7 @@ db_host: "{{ groups['zabbix_db'][0] }}"
 db_port: '5432'
 db_name: 'zabbix'
 db_user: 'zabbix'
-db_password: '4linux'
+db_password: 'password'
 db_schema: 'public'
 db_type: 'POSTGRESQL'
 
