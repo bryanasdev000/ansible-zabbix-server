@@ -2,7 +2,7 @@
 
 ## HOSTS
 Para executar essa playbook será necessário como primeiro passo ajustar o arquivo 'hosts' dentro do diretório "*inventory*" para informar quais serão os servidores que a role executará as tarefas.
-É importante definir as maquinas serão **SERVER** e as que serão **DB**, separando-as nos respectivos grupos também.
+É importante definir as maquinas serão **SERVER** e as que serão **DB**, separando-as nos respectivos grupos também, no momento essa playbook só é suportadada para o centOS 7.
 
 > * allhosts:
 >
