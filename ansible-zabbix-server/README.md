@@ -1,4 +1,4 @@
-# Playbook para implantação de Zabbix Server com PostgreSQL
+# Playbook para implantação de Zabbix Server 4.4 com PostgreSQL utilizando a extensão do TimescaleDB.
 
 ## HOSTS
 Para executar essa playbook será necessário como primeiro passo ajustar o arquivo 'hosts' dentro do diretório "*inventory*" para informar quais serão os servidores que a role executará as tarefas.
@@ -33,4 +33,6 @@ Este ponto é muito importante e **NÃO PODE SER IGNORADO**, aqui você irá def
 * Time Zone;
 * Configuração de HBA do PostgreSQL;
 
+
+Criado por [Rauny Moreira](https://www.linkedin.com/in/rauny-moreira/).
 
