@@ -1,0 +1,35 @@
+---
+- name: Install PostgreSQL
+  include: install_postgres.yml
+  when: postgres and inventory_hostname in groups['zabbix_db']
+
+- name: Configure PostgreSQL for Zabbix
+  include: config_postgres.yml
+  when: conf_postgres and inventory_hostname in groups['zabbix_db']
+
+- name: Install Zabbix Server
+  include: install_zabbix_server.yml
+  when: install and inventory_hostname in groups['zabbix_server']
+
+- name: Config Zabbix Server
+  include: config_zabbix_server.yml
+  when: config and inventory_hostname in groups['zabbix_server']
+
+- name: Populate Service Facts
+  service_facts:
+
+- name: Ensure Zabbix Services Will be Running
+  systemd:
+    name: "{{item}}"
+    state: started
+    enabled: yes
+  when: "inventory_hostname in groups['zabbix_server'] and hostvars[inventory_hostname]['services']['{{item}}.service']['state'] != 'running'"
+  with_items:
+    - '{{services}}'
+
+- name: Ensure PostgreSQL Service Will be Running
+  systemd:
+    name: "{{ postgresql_daemon }}"
+    state: started
+    enabled: yes
+  when: "inventory_hostname in groups['zabbix_db'] and hostvars[inventory_hostname]['services']['{{ postgresql_daemon }}.service']['state'] != 'running'"

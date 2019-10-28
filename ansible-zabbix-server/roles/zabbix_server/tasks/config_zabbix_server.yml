@@ -1,0 +1,58 @@
+---
+- name: Set SELINUX to Permissive
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: 'SELINUX=permissive'
+  register: sestatus
+
+- name: restart system
+  reboot:
+    pre_reboot_delay: 5 
+  when: sestatus.changed
+
+- name: Add port exception in firewall-cmd
+  firewalld:      
+    port: "{{item}}/tcp"
+    zone: public  
+    permanent: yes
+    state: enabled
+  register: add_zabbix_port
+  with_items: "{{service_ports}}"
+                    
+- name: Restart Firewall Service
+  service:        
+    name: firewalld
+    state: restarted
+  when: add_zabbix_port.changed
+
+- name: Template Zabbix conf
+  template:
+    src: zabbix_server.conf.j2
+    dest: "{{zabbix_conf_path}}/zabbix_server.conf"
+    mode: u=rw,g=r,o=r
+
+- name: Template Zabbix http conf
+  template:
+    src: zabbix.conf.j2
+    dest: "{{zabbix_http_path}}/zabbix.conf"
+    mode: u=rw,g=r,o=r
+
+- name: Template Zabbix PHP Conf
+  template:
+    src: zabbix.conf.php.j2
+    dest: "{{zabbix_web_path}}zabbix.conf.php"
+    mode: u=rw,g=r,o=r
+
+- name: Check if Schema Already Exist
+  command: "sudo -u zabbix psql -h {{ groups['zabbix_db'][0] }} zabbix -t -c 'copy (select count(*) from pg_stat_user_tables) to stdout'"
+  register: tables
+
+- name: Import Zabbix Schema
+  shell: "zcat /usr/share/doc/zabbix-server-pgsql*/create.sql.gz | sudo -u zabbix psql -h {{ groups['zabbix_db'][0] }} zabbix"
+  when: "{{ tables.stdout }} <= 21"
+ 
+- name: Impport Timescaledb Script
+  shell: "zcat /usr/share/doc/zabbix-server-pgsql*/timescaledb.sql.gz | sudo -u zabbix psql -h {{ groups['zabbix_db'][0] }} zabbix"
+  when: "{{ tables.stdout }} <= 21"
+

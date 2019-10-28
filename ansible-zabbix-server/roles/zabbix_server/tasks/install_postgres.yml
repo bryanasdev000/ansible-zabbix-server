@@ -1,0 +1,45 @@
+---
+
+- name: Import PostgreSQL RPM Key
+  rpm_key: 
+    key: "{{postgres_key_url}}"
+    state: present
+
+- name: Get PostgreSQL RPM
+  yum: 
+    name: "{{postgres_rpm_url}}"
+    state: present
+
+- name: Install PostgreSQL
+  yum: 
+    name: "{{item}}"
+    state: present
+  with_items:
+      - "{{postgresql_packages}}"
+  notify:
+    - Start Service
+
+- name: Ensure PostgreSQL Python libraries are installed.
+  package:
+    name: "{{ postgresql_python_library }}"
+    state: present
+
+- name: Check if PostgreSQL database is initialized.
+  stat:
+    path: "{{ postgresql_data_dir }}/PG_VERSION"
+  register: pgdata_dir_version
+
+- name: Ensure PostgreSQL database is initialized.
+  command: "{{ postgresql_bin_path }}/initdb -D {{ postgresql_data_dir }}"
+  when: not pgdata_dir_version.stat.exists
+  become: true
+  become_user: "{{ postgresql_user }}"
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Ensure PostgreSQL is started and enabled on boot.
+  service:
+    name: "{{ postgresql_daemon }}"
+    state: "{{ postgresql_service_state }}"
+    enabled: "{{ postgresql_service_enabled }}"
+

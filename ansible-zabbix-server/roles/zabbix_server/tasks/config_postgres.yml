@@ -1,0 +1,82 @@
+---
+- name: Configure host based authentication (if entries are configured).
+  template:
+    src: "pg_hba.conf.j2"
+    dest: "{{ postgresql_config_path }}/pg_hba.conf"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: 0600
+  notify: restart postgresql
+  when: postgresql_hba_entries
+
+- name: Add port exception in firewall-cmd
+  firewalld:
+    port: "{{db_port}}/tcp"
+    zone: public
+    permanent: yes
+    state: enabled
+  register: add_pg_port
+
+- name: Restart Firewall Service
+  service:
+    name: firewalld
+    state: restarted
+  when: add_pg_port.changed
+
+- name: Setup Auto Conf File
+  postgresql_set:
+    name: 'listen_addresses'
+    value: '*'
+  become_user: "{{ postgresql_user }}"
+  register: alter_system_result
+
+- name: Force-restart PostgreSQL after alter system changes.
+  service:
+    name: "{{ postgresql_daemon }}"
+    state: restarted
+  when: alter_system_result.changed
+
+- name: Ensure PostgreSQL users are present.
+  postgresql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password | default(omit) }}"
+  with_items: "{{ postgresql_users }}"
+  become: true
+  become_user: "{{ postgresql_user }}"
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Ensure PostgreSQL databases are present.
+  postgresql_db:
+    name: "{{ item.name }}"
+    owner: "{{ item.owner | default(postgresql_user) }}"
+  with_items: "{{ postgresql_databases }}"
+  become: true
+  become_user: "{{ postgresql_user }}"
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: TimescaleDB | Configure postgresql.conf
+  lineinfile:
+    dest: "{{ postgresql_config_path }}/postgresql.conf"
+    state: present
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.guc }}"
+  with_items: "{{ postgresql_conf_default_guc }}"
+  register: timescaledb_conf
+
+- name: Force-restart PostgreSQL after change conf.
+  service:
+    name: "{{ postgresql_daemon }}"
+    state: restarted
+  when: timescaledb_conf.changed
+
+- name: Add Timescaledb Extension
+  postgresql_ext:
+    name: timescaledb
+    db: zabbix
+    cascade: yes
+    state: present
+  become: true
+  become_user: "{{ postgresql_user }}"
+

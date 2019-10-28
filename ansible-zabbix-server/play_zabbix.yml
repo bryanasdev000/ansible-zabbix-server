@@ -1,0 +1,16 @@
+---
+- name: Zabbix Server
+  hosts: allhosts
+  #define variable for zabbix
+  vars:
+     #install zabbix server when install is true
+     install: true
+     #config the zabbix-server configuration when config is true
+     config: true
+     #install postgres when postgres is true
+     postgres: true
+     #config postgres when conf-postgres is true
+     conf_postgres: true
+  become: yes
+  roles:
+   - zabbix_server
