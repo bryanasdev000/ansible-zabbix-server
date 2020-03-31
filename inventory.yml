@@ -1,6 +1,3 @@
-[allhosts]
-#HOSTNAME ansible_host= #IP_ADDRESS
-
 [zabbix_server]
 
 [zabbix_db]
