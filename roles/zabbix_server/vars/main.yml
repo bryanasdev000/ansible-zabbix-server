@@ -64,16 +64,16 @@ postgresql_service_state: started
 postgresql_service_enabled: true
 
 postgresql_version: "11"
-postgresql_data_dir: "/var/lib/pgsql/{{postgresql_version}}/data"
-postgresql_bin_path: "/usr/pgsql-{{postgresql_version}}/bin/"
-postgresql_config_path: "/var/lib/pgsql/{{postgresql_version}}/data"
-postgresql_daemon: "postgresql-{{postgresql_version}}"
+postgresql_data_dir: "/var/lib/pgsql/{{ postgresql_version }}/data"
+postgresql_bin_path: "/usr/pgsql-{{ postgresql_version }}/bin/"
+postgresql_config_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+postgresql_daemon: "postgresql-{{ postgresql_version }}"
 postgresql_packages:
-- postgresql{{postgresql_version}}
-- postgresql{{postgresql_version}}-server
-- postgresql{{postgresql_version}}-contrib
-- postgresql{{postgresql_version}}-libs
-- timescaledb_{{postgresql_version}}
+- postgresql{{ postgresql_version }}
+- postgresql{{ postgresql_version }}-server
+- postgresql{{ postgresql_version }}-contrib
+- postgresql{{ postgresql_version }}-libs
+- timescaledb_{{ postgresql_version }}
 
 postgresql_users:
   - name: "{{ db_user }}" 

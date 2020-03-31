@@ -20,16 +20,16 @@
 
 - name: Ensure Zabbix Services Will be Running
   systemd:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: started
     enabled: yes
-  when: "inventory_hostname in groups['zabbix_server'] and hostvars[inventory_hostname]['services']['{{item}}.service']['state'] != 'running'"
+  when: "inventory_hostname in groups['zabbix_server'] and hostvars[inventory_hostname]['services']['item.service']['state'] != 'running'"
   with_items:
-    - '{{services}}'
+    - '{{ services }}'
 
 - name: Ensure PostgreSQL Service Will be Running
   systemd:
     name: "{{ postgresql_daemon }}"
     state: started
     enabled: yes
-  when: "inventory_hostname in groups['zabbix_db'] and hostvars[inventory_hostname]['services']['{{ postgresql_daemon }}.service']['state'] != 'running'"
+  when: "inventory_hostname in groups['zabbix_db'] and hostvars[inventory_hostname]['services']['postgresql_daemon.service']['state'] != 'running'"

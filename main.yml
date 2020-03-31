@@ -1,6 +1,6 @@
 ---
 - name: Zabbix Server
-  hosts: allhosts
+  hosts: all
   #define variable for zabbix
   vars:
      #install zabbix server when install is true

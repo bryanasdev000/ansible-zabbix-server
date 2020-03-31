@@ -16,7 +16,7 @@
 - name: Import Zabbix RPM Key
   rpm_key:
     state: present
-    key: "{{zabbix_key_url}}"
+    key: "{{ zabbix_key_url }}"
   register: zabbixkey
 
 - name: wait 5 sec to finish
@@ -26,7 +26,7 @@
 
 - name: Get Zabbix RPM
   yum:
-    name: "{{zabbix_rpm_url}}"
+    name: "{{ zabbix_rpm_url }}"
     state: present
   register: zabbixrpm
 
@@ -37,9 +37,9 @@
 
 - name: Install Zabbix
   yum:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: present
   with_items:
-      - "{{zabbix_server_install}}"
+      - "{{ zabbix_server_install }}"
   notify:
     - Start Service
